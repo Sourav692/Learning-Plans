@@ -1,0 +1,42 @@
+https://mlfunctionapp1.azurewebsites.net/api/eval_function?&username=sourav.h.banerjee&problem=toxic&acc_name=toxicdata&acc_key=qD4RbFtPqQ4txXEQbM3bVIOob5esqXuB+yN1Sks/hBsn2/CZCT3kQdgBq7CN9kGXRT5PW02pm83LZGJs+T+Nrg==&container=toxicdata&filename=submission_after.csv
+
+
+toxic = label1
+threat = label2
+insult = label3
+obscene = label4
+
+
+b'geez are you forgetful we have already discussed why marx was not an anarchist ie he wanted to use a state to mold his socialist man ergo he is a statist the opposite of an anarchist i know a guy who says that when he gets old and his teeth fall out he will quit eating meat would you call him a vegetarian'
+
+
+Train on 325190 samples, validate on 10058 samples
+Epoch 1/2
+325190/325190 [==============================] - 6668s 21ms/step - loss: 0.0678 - val_loss: 0.0503
+ - AUC - improved from 0.00000 to 0.98867
+Epoch 2/2
+325190/325190 [==============================] - 6262s 19ms/step - loss: 0.0381 - val_loss: 0.0452
+ - AUC - improved from 0.98867 to 0.98875
+After training our model, we end up with an AUC ROC score of 98.6% on the first epoch. The accuracy however did not increase on the second epoch but the loss factor reduced ti 3.14%.
+
+
+from azureml.core.model import Model
+import logging
+print(logging.basicConfig(level=logging.DEBUG))
+print(Model.get_model_path(model_name='sklearn_mnist_model.pkl'))
+
+
+import requests
+import json
+import pandas as pd
+
+scoring_uri = 'http://0dd070ab-b34a-48f4-a577-1edc5dde78b7.southeastasia.azurecontainer.io/score'
+headers = {'Content-Type':'application/json'}
+
+data = pd.read_csv("test.csv").head(22000)
+test = json.dumps({'text': data["Text"].str.split("\n").tolist()})
+
+response = requests.post(scoring_uri, data=test, headers=headers)
+print(response.status_code)
+print(response.elapsed)
+print(response.json())
